@@ -1,0 +1,46 @@
+server:
+  port: 8090
+
+spring:
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: academic-service
+          uri: lb://academic-service
+          predicates:
+            - Path=/api/v1/academic/**
+          filters:
+            - RewritePath=/api/v1/academic/(?<segment>.*), /api/v1/${segment}
+
+        - id: tasks-service
+          uri: lb://tasks-service
+          predicates:
+            - Path=/api/v1/tasks/**
+          filters:
+            - RewritePath=/api/v1/tasks/(?<segment>.*), /api/v1/tasks/${segment}
+
+        - id: tutoring-service
+          uri: lb://tutoring-service
+          predicates:
+            - Path=/api/v1/tutoring/**
+          filters:
+            - RewritePath=/api/v1/tutoring/(?<segment>.*), /api/v1/tutoring/${segment}
+
+management:
+  endpoint:
+    gateway:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: gateway,health,info
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
